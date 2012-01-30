@@ -2,4 +2,5 @@
 <!-- Apache Commons Configuration -->
 <configuration>
 	<properties fileName="registryLdap.properties"/>
+        <properties fileName="file:/etc/dataone/node.properties"/>
 </configuration>

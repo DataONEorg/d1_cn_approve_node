@@ -133,7 +133,7 @@
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_common_java</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1-RC1</version>
             <type>jar</type>
             <optional>false</optional>
             <scope>compile</scope>
@@ -153,19 +153,19 @@
         <dependency>
             <groupId>org.dataone</groupId>
             <artifactId>d1_libclient_java</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1-RC1</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast</artifactId>
-            <version>1.9.4.5</version>
+            <version>1.9.4.6</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast-spring</artifactId>
-            <version>1.9.4.5</version>
+            <version>1.9.4.6</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

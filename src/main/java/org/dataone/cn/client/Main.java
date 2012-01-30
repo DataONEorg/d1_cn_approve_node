@@ -4,6 +4,8 @@
  */
 package org.dataone.cn.client;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -13,6 +15,7 @@ import org.apache.commons.cli.PosixParser;
 
 import org.apache.log4j.Logger;
 import org.dataone.client.auth.CertificateManager;
+import org.dataone.configuration.Settings;
 
 /**
  *
@@ -21,11 +24,44 @@ import org.dataone.client.auth.CertificateManager;
 public class Main {
 
     static Logger logger = Logger.getLogger(Main.class.getName());
+    static FilenameFilter certificateFilter = new CertificateFilter();
+    static {
+       String clientCertificateDirectory =  Settings.getConfiguration().getString("D1Client.certificate.directory");
+           
+        File certsDirectory = new File(clientCertificateDirectory);
 
+        if (certsDirectory.exists() && certsDirectory.isDirectory()) {
+            File[] certificateFiles = certsDirectory.listFiles(certificateFilter);
+            if (certificateFiles.length > 0) {
+                String clientCertificateLocation = null;
+
+                if (certificateFiles.length > 1) {
+                    System.console().printf("Choose the number of the Certificate to use\n");
+                    for (int i = 0; i < certificateFiles.length; ++i) {
+                        System.console().printf("%d)\t%s\n", i, certificateFiles[i].getName());
+                    }
+                    String certSelection = System.console().readLine();
+                    Integer certInteger;
+                   try {
+                        certInteger = Integer.parseInt(certSelection);
+                    } catch(NumberFormatException e) {
+                        throw new RuntimeException(e.getMessage());
+                    }
+                    clientCertificateLocation = certificateFiles[certInteger].getAbsolutePath();
+                } else {
+                    clientCertificateLocation = certificateFiles[0].getAbsolutePath();
+                }
+
+                CertificateManager.getInstance().setCertificateLocation(clientCertificateLocation);
+            }
+        }
+
+
+
+    }
     public static void main(String[] args) {
         try {
             String nodeId = null;
-            String clientCertificateLocation = null;
             NodeApproval nodeApproval = new NodeApproval();
 // create the command line parser
             CommandLineParser parser = new PosixParser();
@@ -34,17 +70,9 @@ public class Main {
             Options options = new Options();
             options.addOption("h", "help", false, "print options");
             options.addOption(OptionBuilder.withLongOpt("NodeId").withDescription("the id of the node to approve").hasArg().withType(String.class).withValueSeparator().withArgName("NODEID").create());
-            options.addOption(OptionBuilder.withLongOpt("Certificate").withDescription("fullpath + filename of client certificate to use for authentication").hasArg().withType(String.class).withValueSeparator().withArgName("CERTIFICATE").create());
             // parse the command line arguments
             CommandLine line = parser.parse(options, args);
             if (line.hasOption("h") || line.hasOption("help")) {
-                HelpFormatter formatter = new HelpFormatter();
-                formatter.printHelp("D1ApproveNode", options);
-                return;
-            }
-            if (line.hasOption("Certificate")) {
-                clientCertificateLocation = line.getOptionValue("Certificate");
-            } else {
                 HelpFormatter formatter = new HelpFormatter();
                 formatter.printHelp("D1ApproveNode", options);
                 return;
@@ -53,8 +81,7 @@ public class Main {
                 nodeId = line.getOptionValue("NodeId");
             } 
 
-            CertificateManager.getInstance().setCertificateLocation(clientCertificateLocation);
-
+            nodeApproval.approveNode(nodeId);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
