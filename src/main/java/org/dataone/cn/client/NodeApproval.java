@@ -5,24 +5,13 @@
 package org.dataone.cn.client;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.security.NoSuchAlgorithmException;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
 
 
-import org.dataone.client.CNode;
 import org.dataone.service.exceptions.*;
-import org.dataone.service.cn.v1.CNCore;
-import org.dataone.service.cn.v1.CNRead;
 import org.dataone.service.types.v1.Node;
-import org.dataone.service.types.v1.Session;
-import org.dataone.service.util.D1Url;
-import org.xml.sax.SAXException;
 import org.dataone.service.cn.impl.v1.NodeRegistryService;
 import org.dataone.service.types.v1.NodeReference;
 import org.dataone.cn.hazelcast.ClientConfiguration;
@@ -30,7 +19,7 @@ import com.hazelcast.config.ClasspathXmlConfig;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import java.io.InputStream;
+import org.dataone.cn.ldap.NodeAccess;
 /**
  *
  * @author waltz
@@ -39,7 +28,7 @@ public class NodeApproval {
 
     NodeRegistryService nodeRegistryService = new NodeRegistryService();
     private static String[] approvedResponses = {"Y", "N", "C"};
- 
+    NodeAccess nodeAccess = new NodeAccess();
     HazelcastInstance hzclient = null;
 
     public NodeApproval() throws FileNotFoundException {
@@ -58,7 +47,8 @@ public class NodeApproval {
         NodeReference approveNodeId = new NodeReference();
         approveNodeId.setValue(nodeId);
         // Set the approval status to TRUE
-        nodeRegistryService.approveNode(approveNodeId);
+
+        nodeAccess.setNodeApproved(approveNodeId, Boolean.TRUE);
         // Make certain the node can be retrieved now
         Node node = nodeRegistryService.getNode(approveNodeId);
         // This is important! Hazelcast need to know that a node is available for processing
@@ -71,7 +61,7 @@ public class NodeApproval {
         System.console().printf("Pending Nodes to Approve\n");
         String approval = "";
         String nodeId = "";
-        List<NodeReference> pendingNodeList = nodeRegistryService.getAllPendingNodeIds();
+        List<NodeReference> pendingNodeList = nodeAccess.getPendingNodeReferenceList();
         do {
             int rows = pendingNodeList.size() / 4;
             for (int i = 0; i < rows; ++i) {
