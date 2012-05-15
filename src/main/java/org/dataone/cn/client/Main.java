@@ -36,7 +36,17 @@ import org.dataone.client.auth.CertificateManager;
 import org.dataone.configuration.Settings;
 
 /**
- *
+ * Approve a node for inclusion in the active dataone nodelist
+ * 
+ * java -jar d1_cn_approve_node.jar [--NodeId d1-node-id]
+ * 
+ * If the NodeId argument is not passed in the the user will be presented with a
+ * list of unapproved nodes and ask for input
+ * 
+ * Once a node has been selected (or provided) the process will update the 
+ * ldap entry, retrieve the node from ldap, retrieve the HZ Nodes map and then
+ * publish the change in hzNodes Map.
+ * 
  * @author waltz
  */
 public class Main {
@@ -103,5 +113,6 @@ public class Main {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        System.exit(0);
     }
 }
