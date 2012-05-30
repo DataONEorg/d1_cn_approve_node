@@ -71,7 +71,7 @@ public class NodeApproval {
         approveNodeId.setValue(nodeId);
         // Set the approval status to TRUE in LDAP
 
-//        nodeAccess.setNodeApproved(approveNodeId, Boolean.TRUE);
+        nodeAccess.setNodeApproved(approveNodeId, Boolean.TRUE);
         System.console().printf("Node Approved in LDAP\n");
         // Make certain the node can be retrieved now
         Node node = nodeRegistryService.getNode(approveNodeId);
