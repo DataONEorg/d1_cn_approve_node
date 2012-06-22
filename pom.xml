@@ -4,7 +4,7 @@
     <groupId>org.dataone</groupId>
     <artifactId>d1_cn_approve_node</artifactId>
     <name>DataONE_Cn_Aprove_Node</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <description>DataOne Cn Aproval Client for Registered Member Nodes</description>
     <url>http://dataone.org</url>
     <packaging>jar</packaging>
