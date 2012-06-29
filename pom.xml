@@ -11,8 +11,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hazelcast.version>1.9.4.6</hazelcast.version>
-        <d1_libclient_version>1.0.1</d1_libclient_version>
-        <d1_cn_noderegistry_version>1.0.0</d1_cn_noderegistry_version>
+        <d1_libclient_version>1.0.3</d1_libclient_version>
+        <d1_cn_noderegistry_version>1.0.1</d1_cn_noderegistry_version>
     </properties>
     <build>
         <plugins>
