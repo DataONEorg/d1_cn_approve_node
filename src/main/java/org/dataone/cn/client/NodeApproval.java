@@ -33,6 +33,8 @@ import org.dataone.service.types.v1.Node;
 import org.dataone.service.cn.impl.v1.NodeRegistryService;
 import org.dataone.service.types.v1.NodeReference;
 import org.dataone.cn.hazelcast.ClientConfiguration;
+import org.dataone.cn.hazelcast.HazelcastClientInstance;
+
 import com.hazelcast.config.ClasspathXmlConfig;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.HazelcastInstance;
@@ -52,11 +54,9 @@ public class NodeApproval {
     HazelcastInstance hzclient = null;
 
     public NodeApproval() throws FileNotFoundException {
-        ClasspathXmlConfig hzConfig = new ClasspathXmlConfig("org/dataone/configuration/hazelcastClientConf.xml");
-        ClientConfiguration clientConfiguration = new ClientConfiguration(hzConfig);
 
-        hzclient = HazelcastClient.newHazelcastClient(clientConfiguration.getGroup(), clientConfiguration.getPassword(),
-                clientConfiguration.getLocalhost());
+
+        hzclient = HazelcastClientInstance.getHazelcastClient();
     }
 
     public void approveNode(String nodeId) throws ServiceFailure, NotFound, IOException {

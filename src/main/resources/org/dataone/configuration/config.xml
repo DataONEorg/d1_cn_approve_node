@@ -2,6 +2,6 @@
 <!-- Apache Commons Configuration -->
 <configuration>
         <properties fileName="file:/etc/dataone/ldapService.properties"/>
-	<properties fileName="registryLdap.properties"/>
+		<properties fileName="registryLdap.properties"/>
         <properties fileName="file:/etc/dataone/node.properties"/>
 </configuration>
