@@ -73,6 +73,16 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+		<repository>
+			<id>dataone.org</id>
+			<url>http://dev-testing.dataone.org/maven</url>
+			<releases>
+			    <enabled>true</enabled>
+			</releases>
+			<snapshots>
+			    <enabled>true</enabled>
+			</snapshots>
+		</repository>
     </repositories>
     <dependencies>
         <!--  maven specific plugins to make life more configurable-->
