@@ -54,6 +54,7 @@ public class Main {
     static Logger logger = Logger.getLogger(Main.class.getName());
     static FilenameFilter certificateFilter = new CertificateFilter();
     static {
+    	Settings.getConfiguration().addProperty("dataone.hazelcast.location.clientconfig", "classpath:org/dataone/configuration/hazelcastClientConf.xml");
        String clientCertificateDirectory =  Settings.getConfiguration().getString("D1Client.certificate.directory");
            
         File certsDirectory = new File(clientCertificateDirectory);
