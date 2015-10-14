@@ -29,21 +29,18 @@ import java.util.Arrays;
 
 
 import org.dataone.service.exceptions.*;
-import org.dataone.service.types.v1.Node;
-import org.dataone.service.cn.impl.v1.NodeRegistryService;
+import org.dataone.service.cn.impl.v2.NodeRegistryService;
 import org.dataone.service.types.v1.NodeReference;
-import org.dataone.cn.hazelcast.ClientConfiguration;
-import org.dataone.cn.hazelcast.HazelcastClientInstance;
-
-import com.hazelcast.config.ClasspathXmlConfig;
 import com.hazelcast.client.HazelcastClient;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
+import com.hazelcast.core.ITopic;
 import java.io.IOException;
+import org.dataone.cn.hazelcast.HazelcastClientFactory;
 import org.dataone.cn.ldap.NodeAccess;
+import org.dataone.configuration.Settings;
 
 /**
- *
+ * Set the node to approved in ldap and inform hazelcast of the change
+ * 
  * @author waltz
  */
 public class NodeApproval {
@@ -51,13 +48,15 @@ public class NodeApproval {
     NodeRegistryService nodeRegistryService = new NodeRegistryService();
     private static String[] approvedResponses = {"Y", "N", "C"};
     NodeAccess nodeAccess = new NodeAccess();
-    HazelcastInstance hzclient = null;
-
+    ITopic<NodeReference> hzNodeTopic = null;
+    static final String hzNodeTopicName = Settings.getConfiguration().getString("dataone.hazelcast.nodeTopic");
+    
     public NodeApproval() throws FileNotFoundException {
-        hzclient = HazelcastClientInstance.getHazelcastClient();
+        HazelcastClient hzclient = HazelcastClientFactory.getProcessingClient();
+        hzNodeTopic = hzclient.getTopic(hzNodeTopicName);
     }
 
-    public void approveNode(String nodeId) throws ServiceFailure, NotFound, IOException {
+    public void approveNode(String nodeId) throws ServiceFailure, NotFound, IOException, InterruptedException {
         // If the nodeId is not provided, prompt from console
         if (nodeId == null) {
             nodeId = promptPendingList();
@@ -71,24 +70,17 @@ public class NodeApproval {
 
         nodeAccess.setNodeApproved(approveNodeId, Boolean.TRUE);
         System.console().printf("Node Approved in LDAP\n");
-        // Make certain the node can be retrieved now
-        Node node = nodeRegistryService.getNode(approveNodeId);
-//        System.console().printf("Node Retreived from LDAP\n");
-        
-        // This is important! Hazelcast need to know that a node is available for processing
-        // perform an update so that a message is generated to d1_processing
-        // Strangly performing a 'GET' on the hzNodes sends an update event
-        // I don't wonder if this is a bug of some sort.
-        
-        IMap<NodeReference, Node> hzNodes = hzclient.getMap("hzNodes");
-        // force population of the node (hopefully without a create)
-        hzNodes.keySet();
-//        Node node = hzNodes.get(approveNodeId);
-//        System.console().printf("Hazelcast Node Retreived\n");
-        
-        // put the node back in hzNodes forcing an update event across the cluster
-        hzNodes.put(approveNodeId, node);
-        System.console().printf("Hazelcast Node Updated. Approval Complete\n");
+       
+        // XXX This is bad. setting the node approval should trigger the nodelist to recache
+        // but I am making calls directly against nodeAccess instead of through
+        // the NodeRegistryService
+        // So, lets guess the refresh rate on nodeList is still 3 seconds
+        // to Make certain the node can be retrieved by the scheduler of synchronization
+        //
+        Thread.sleep(3500L);
+
+        hzNodeTopic.publish(approveNodeId);
+        System.console().printf("Hazelcast Node Topic published to. Approval Complete\n");
         System.console().writer().flush();
         System.console().writer().close();
         System.console().reader().close();

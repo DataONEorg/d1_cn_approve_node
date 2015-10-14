@@ -113,6 +113,7 @@ public class Main {
             nodeApproval.approveNode(nodeId);
         } catch (Exception ex) {
             ex.printStackTrace();
+            System.exit(1);
         }
         System.exit(0);
     }
