@@ -29,14 +29,15 @@ import java.util.Arrays;
 
 
 import org.dataone.service.exceptions.*;
-import org.dataone.service.cn.impl.v2.NodeRegistryService;
+import org.dataone.service.cn.v2.impl.NodeRegistryServiceImpl;
 import org.dataone.service.types.v1.NodeReference;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.core.ITopic;
 import java.io.IOException;
 import org.dataone.cn.hazelcast.HazelcastClientFactory;
-import org.dataone.cn.ldap.NodeAccess;
 import org.dataone.configuration.Settings;
+import org.dataone.service.types.v2.Node;
+import org.dataone.service.types.v2.NodeList;
 
 /**
  * Set the node to approved in ldap and inform hazelcast of the change
@@ -45,9 +46,8 @@ import org.dataone.configuration.Settings;
  */
 public class NodeApproval {
 
-    NodeRegistryService nodeRegistryService = new NodeRegistryService();
+    NodeRegistryServiceImpl nodeRegistryService = new NodeRegistryServiceImpl();
     private static String[] approvedResponses = {"Y", "N", "C"};
-    NodeAccess nodeAccess = new NodeAccess();
     ITopic<NodeReference> hzNodeTopic = null;
     static final String hzNodeTopicName = Settings.getConfiguration().getString("dataone.hazelcast.nodeTopic");
     
@@ -56,7 +56,7 @@ public class NodeApproval {
         hzNodeTopic = hzclient.getTopic(hzNodeTopicName);
     }
 
-    public void approveNode(String nodeId) throws ServiceFailure, NotFound, IOException, InterruptedException {
+    public void approveNode(String nodeId) throws ServiceFailure, NotFound, IOException, InterruptedException, NotImplemented {
         // If the nodeId is not provided, prompt from console
         if (nodeId == null) {
             nodeId = promptPendingList();
@@ -68,7 +68,7 @@ public class NodeApproval {
         approveNodeId.setValue(nodeId);
         // Set the approval status to TRUE in LDAP
 
-        nodeAccess.setNodeApproved(approveNodeId, Boolean.TRUE);
+        nodeRegistryService.approveNode(approveNodeId);
         System.console().printf("Node Approved in LDAP\n");
        
         // XXX This is bad. setting the node approval should trigger the nodelist to recache
@@ -87,10 +87,12 @@ public class NodeApproval {
         
     }
 
-    private String promptPendingList() throws ServiceFailure {
+    private String promptPendingList() throws ServiceFailure, NotImplemented, NotFound {
         String approval = "N";
         String nodeId = null;
-        List<NodeReference> pendingNodeList = nodeAccess.getPendingNodeReferenceList();
+        NodeList pendingNodes = nodeRegistryService.listPendingNodes();
+        List<Node> pendingNodeList = pendingNodes.getNodeList();
+        //List<NodeReference> pendingNodeList = nodeAccess.getPendingNodeReferenceList();
         if (!pendingNodeList.isEmpty()) {
             System.console().printf("Pending Nodes to Approve\n");
             do {
@@ -98,10 +100,10 @@ public class NodeApproval {
                 for (int i = 0; i < rows; ++i) {
 
                     System.console().printf("%d) %s\t%d) %s\t%d) %s\t%d) %s\n", 
-                            ((i * 4) + 0), pendingNodeList.get((i * 4) + 0).getValue(),
-                            ((i * 4) + 1), pendingNodeList.get((i * 4) + 1).getValue(),
-                            ((i * 4) + 2), pendingNodeList.get((i * 4) + 2).getValue(),
-                            ((i * 4) + 3), pendingNodeList.get((i * 4) + 3).getValue());
+                            ((i * 4) + 0), pendingNodeList.get((i * 4) + 0).getIdentifier().getValue(),
+                            ((i * 4) + 1), pendingNodeList.get((i * 4) + 1).getIdentifier().getValue(),
+                            ((i * 4) + 2), pendingNodeList.get((i * 4) + 2).getIdentifier().getValue(),
+                            ((i * 4) + 3), pendingNodeList.get((i * 4) + 3).getIdentifier().getValue());
                 }
                 int remainder = pendingNodeList.size() % 4;
 
@@ -112,7 +114,7 @@ public class NodeApproval {
                     for (int i = 0, j = 0; i < remainder; i++, j = j +2) {
                         formatStringBuilder.append("%s) %s\t");
                         consoleArgs[j] = new Integer((rows * 4) + i).toString();
-                        consoleArgs[j + 1] =  pendingNodeList.get((rows * 4) + i).getValue();
+                        consoleArgs[j + 1] =  pendingNodeList.get((rows * 4) + i).getIdentifier().getValue();
                     }
                     formatStringBuilder.append("\n");
                     System.console().printf(formatStringBuilder.toString(), consoleArgs);
@@ -121,7 +123,7 @@ public class NodeApproval {
                 String nodeIdIndex = System.console().readLine();
                 try {
                     int nodeListIndex = Integer.parseInt(nodeIdIndex);
-                    nodeId = pendingNodeList.get(nodeListIndex).getValue();
+                    nodeId = pendingNodeList.get(nodeListIndex).getIdentifier().getValue();
                     List<String> validApprovalResponses = new ArrayList<String>(Arrays.asList(approvedResponses));
 
                     do {
