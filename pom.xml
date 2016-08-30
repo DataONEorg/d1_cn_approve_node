@@ -13,6 +13,7 @@
         <hazelcast.version>2.4.1</hazelcast.version>
         <d1_libclient_java.version>2.3.0-SNAPSHOT</d1_libclient_java.version>
         <d1_cn_noderegistry.version>2.3.0-SNAPSHOT</d1_cn_noderegistry.version>
+        <compiler.target.version>1.7</compiler.target.version>
     </properties>
     <build>
         <plugins>
@@ -21,7 +22,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>1.7</source>
-                    <target>1.7</target>
+                    <target>${compiler.target.version}</target>
                 </configuration>
             </plugin>
             <plugin>
