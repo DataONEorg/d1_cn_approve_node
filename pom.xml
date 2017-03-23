@@ -4,15 +4,15 @@
     <groupId>org.dataone</groupId>
     <artifactId>d1_cn_approve_node</artifactId>
     <name>DataONE_Cn_Approve_Node</name>
-    <version>2.3.0-SNAPSHOT</version>
+    <version>2.4.0-SNAPSHOT</version>
     <description>DataOne Cn Approval Client for Registered Member Nodes</description>
     <url>http://dataone.org</url>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hazelcast.version>2.4.1</hazelcast.version>
-        <d1_libclient_java.version>2.3.0-SNAPSHOT</d1_libclient_java.version>
-        <d1_cn_noderegistry.version>2.3.0-SNAPSHOT</d1_cn_noderegistry.version>
+        <d1_libclient_java.version>2.4.0-SNAPSHOT</d1_libclient_java.version>
+        <d1_cn_noderegistry.version>2.4.0-SNAPSHOT</d1_cn_noderegistry.version>
         <compiler.target.version>1.7</compiler.target.version>
     </properties>
     <build>
